@@ -1,0 +1,6 @@
+/* THE ORDERS TABLE UP */
+
+CREATE TABLE orders (
+id SERIAL PRIMARY KEY NOT NULL UNIQUE,
+status order_status NOT NULL,
+user_id INTEGER REFERENCES users(id) NOT NULL);

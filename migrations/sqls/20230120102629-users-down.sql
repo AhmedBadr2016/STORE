@@ -1,0 +1,3 @@
+/* THE USERS TABLE DOWN */
+
+Drop TABLE users;

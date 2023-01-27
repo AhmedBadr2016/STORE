@@ -1,0 +1,15 @@
+{
+  "prettier/prettier": [
+    "error",
+    {
+      "singleQuote": true,
+      "parser": "flow",
+      "semi": true,
+      "printWidth": 120,
+      "bracketSpacing": true
+    },
+    {
+      "usePrettierrc": false
+    }
+  ]
+}

@@ -1,0 +1,3 @@
+/* THE ORDERS TABLE DOWN */
+
+Drop TABLE orders;
