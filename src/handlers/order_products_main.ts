@@ -51,14 +51,16 @@ const show = async (req: Request, res: Response) => {
 
 const create = async (req: Request, res: Response) => {
   try {
-    const order_product: order_products = {
-      id: req.body.id,
-      order_id: req.body.order_id,
-      product_id: req.body.product_id,
-      quantity: req.body.quantity,
-    };
-    if (order_product) {
-      const new_product = await our_order_product_main.create(order_product);
+    const order_id = req.body.order_id;
+    const product_id = req.body.product_id;
+    const quantity = req.body.quantity;
+
+    if (order_id && product_id && quantity) {
+      const new_product = await our_order_product_main.create(
+        order_id,
+        product_id,
+        quantity
+      );
       return res.json({
         status: 200,
         data: { ...new_product },
@@ -78,15 +80,14 @@ const create = async (req: Request, res: Response) => {
 
 const update = async (req: Request, res: Response) => {
   try {
-    const order_product: order_products = {
-      id: req.params.id,
-      order_id: req.body.order_id,
-      product_id: req.body.product_id,
-      quantity: req.body.quantity,
-    };
-    if (order_product) {
+    const id = req.params.id;
+    const order_id = req.body.order_id;
+    const product_id = req.body.product_id;
+    const quantity = req.body.quantity;
+    if (id && order_id && product_id && quantity) {
       const new_product = await our_order_product_main.update_order_product(
-        order_product
+        id,
+        quantity
       );
       return res.json({
         status: 200,
@@ -153,9 +154,9 @@ const addProduct = async (_req: Request, res: Response) => {
 };
 
 const order_products_handler = (app: express.Application): void => {
-  app.get("/order_products", index);
+  app.get("/order_products", verifyAuthToken, index);
 
-  app.get("/order_product/:id", show);
+  app.get("/order_product/:id", verifyAuthToken, show);
 
   app.post("/order_product/create", verifyAuthToken, create);
 

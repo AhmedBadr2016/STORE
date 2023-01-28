@@ -65,20 +65,20 @@ class order_model {
   }
 
   // update orders
-  async update_order(o: orders): Promise<orders> {
+  async update_order(id: string, status: string): Promise<orders> {
     try {
       // open connection with Client
       const Connection = await Client.connect();
       const sql = "UPDATE orders SET status=($2) WHERE id=($1) RETURNING *";
       // run query
-      const output = await Connection.query(sql, [o.id, o.status]);
+      const output = await Connection.query(sql, [id, status]);
       // release the connection to database
       Connection.release();
       // retunrn the order
       return output.rows[0];
     } catch (err) {
       throw new Error(
-        `Could not create (${o.status}): ${err as Error["message"]}`
+        `Could not create (${status}): ${err as Error["message"]}`
       );
     }
   }

@@ -75,18 +75,24 @@ export class userStore {
   }
 
   // update user
-  async update(u: users): Promise<users> {
+  async update(
+    first_name: string,
+    last_name: string,
+    email: string,
+    username: string,
+    password: string
+  ): Promise<users> {
     try {
       const sql =
-        "UPDATE users SET first_name= ($1) , last_name= ($2) , email= ($3) , username= ($4), password= ($5) WHERE email= ($3) ";
+        "UPDATE users SET first_name= ($1) , last_name= ($2) , username= ($4), password= ($5) WHERE email= ($3) ";
       const conn = await Client.connect();
 
       const result = await conn.query(sql, [
-        u.first_name,
-        u.last_name,
-        u.email,
-        u.username,
-        hash_password(u.password),
+        first_name,
+        last_name,
+        email,
+        username,
+        hash_password(password),
       ]);
 
       const user = result.rows[0];
@@ -95,7 +101,7 @@ export class userStore {
 
       return user;
     } catch (err) {
-      throw new Error(`Could not update new user ${u.email}. Error: ${err}`);
+      throw new Error(`Could not update new user ${email}. Error: ${err}`);
     }
   }
 

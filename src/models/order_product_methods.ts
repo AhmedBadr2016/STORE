@@ -4,21 +4,29 @@ import { order_products } from "../types/order_products";
 class order_product_model {
   // the order model
   // first create item in the database!
-  async create(op: order_products): Promise<order_products> {
+  async create(
+    order_id: string,
+    product_id: string,
+    quantity: number
+  ): Promise<order_products> {
     try {
       // open connection with Client
       const Connection = await Client.connect();
       const sql =
-        "INSERT INTO order_products (quantity) VALUES ($1) RETURNING *";
+        "INSERT INTO order_products (order_id, product_id, quantity) VALUES ($1) RETURNING *";
       // run query
-      const output = await Connection.query(sql, [op.quantity]);
+      const output = await Connection.query(sql, [
+        order_id,
+        product_id,
+        quantity,
+      ]);
       // release the connection to database
       Connection.release();
       // retunrn the order
       return output.rows[0];
     } catch (err) {
       throw new Error(
-        `Could not create (${op.quantity}): ${err as Error["message"]}`
+        `Could not create (${quantity}): ${err as Error["message"]}`
       );
     }
   }
@@ -45,14 +53,14 @@ class order_product_model {
   // get specific order
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async get_specific_order_product(
-    order_id: string
+    id: string
   ): Promise<order_products[] | null> {
     try {
       // open connection with Client
       const Connection = await Client.connect();
       const sql = "SELECT * FROM order_products where order_id=($1)";
       // run query
-      const output = await Connection.query(sql, [order_id]);
+      const output = await Connection.query(sql, [id]);
       const op = output.rows;
       // release the connection to database
       Connection.release();
@@ -69,21 +77,24 @@ class order_product_model {
   }
 
   // update orders
-  async update_order_product(op: order_products): Promise<order_products> {
+  async update_order_product(
+    id: string,
+    quantity: string
+  ): Promise<order_products> {
     try {
       // open connection with Client
       const Connection = await Client.connect();
       const sql =
         "UPDATE order_products SET quantity=($2) WHERE id=($1) RETURNING *";
       // run query
-      const output = await Connection.query(sql, [op.id, op.quantity]);
+      const output = await Connection.query(sql, [id, quantity]);
       // release the connection to database
       Connection.release();
       // retunrn the order
       return output.rows[0];
     } catch (err) {
       throw new Error(
-        `Could not create (${op.quantity}): ${err as Error["message"]}`
+        `Could not create (${quantity}): ${err as Error["message"]}`
       );
     }
   }

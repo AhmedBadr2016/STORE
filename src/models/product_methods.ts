@@ -60,22 +60,24 @@ class product_model {
   }
 
   // update products
-  async update_product(p: products): Promise<products> {
+  async update_product(
+    id: string,
+    name: string,
+    price: number
+  ): Promise<products> {
     try {
       // open connection with Client
       const Connection = await Client.connect();
       const sql =
         "UPDATE products SET name=($2) ,  price=($3) WHERE id=($1) RETURNING *";
       // run query
-      const output = await Connection.query(sql, [p.id, p.name, p.price]);
+      const output = await Connection.query(sql, [id, name, price]);
       // release the connection to database
       Connection.release();
       // retunrn the product
       return output.rows[0];
     } catch (err) {
-      throw new Error(
-        `Could not create (${p.name}): ${err as Error["message"]}`
-      );
+      throw new Error(`Could not create (${name}): ${err as Error["message"]}`);
     }
   }
 

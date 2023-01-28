@@ -27,16 +27,10 @@ const index = async (_req: Request, res: Response) => {
 };
 
 const show = async (req: Request, res: Response) => {
-  const order: orders = {
-    id: req.params.order_id,
-    status: req.body.status,
-    user_id: req.body.user_id,
-  };
+  const id = req.params.id;
   try {
-    const new_order = await our_order_main.get_specific_order(
-      order.id as unknown as string
-    );
-    if (new_order) {
+    if (id) {
+      const new_order = await our_order_main.get_specific_order(id);
       return res.json({
         status: 200,
         data: { ...new_order },
@@ -99,13 +93,11 @@ const create = async (req: Request, res: Response) => {
 
 const update = async (req: Request, res: Response) => {
   try {
-    const order: orders = {
-      id: req.params.id,
-      status: req.body.status,
-      user_id: req.body.id,
-    };
-    const new_order = await our_order_main.update_order(order);
-    if (new_order) {
+    const id = req.params.id;
+    const status = req.body.status;
+    const user_id = req.body.id;
+    if (id && user_id && status) {
+      const new_order = await our_order_main.update_order(id, status);
       return res.json({
         status: 200,
         data: { ...new_order },

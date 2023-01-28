@@ -34,8 +34,9 @@ const index = async (_req: Request, res: Response) => {
 };
 
 const show = async (req: Request, res: Response) => {
-  const new_user = await our_user_main.show(req.params.email);
-  if (new_user) {
+  if (req.params.id) {
+    const new_user = await our_user_main.show(req.params.email);
+
     return res.json({
       status: 200,
       data: { ...new_user },
@@ -122,16 +123,20 @@ const authenticate = async (req: Request, res: Response) => {
 
 const update = async (req: Request, res: Response) => {
   try {
-    const user: users = {
-      first_name: req.body.first_name,
-      last_name: req.body.last_name,
-      email: req.body.email,
-      username: req.body.username,
-      password: req.body.password,
-    };
+    const first_name = req.body.first_name;
+    const last_name = req.body.last_name;
+    const email = req.params.email;
+    const username = req.body.username;
+    const password = req.body.password;
+    if (email && first_name && last_name && username && password) {
+      const new_user = await our_user_main.update(
+        first_name,
+        last_name,
+        email,
+        username,
+        password
+      );
 
-    const new_user = await our_user_main.update(user);
-    if (new_user) {
       return res.json({
         status: 200,
         data: { ...new_user },

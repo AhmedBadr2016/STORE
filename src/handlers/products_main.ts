@@ -22,10 +22,11 @@ const index = async (_req: Request, res: Response) => {
 };
 
 const show = async (req: Request, res: Response) => {
-  const new_product = await our_product_main.get_specific_product(
-    req.params.id
-  );
-  if (new_product) {
+  if (req.params.id) {
+    const new_product = await our_product_main.get_specific_product(
+      req.params.id
+    );
+
     return res.json({
       status: 200,
       data: { ...new_product },
@@ -73,14 +74,16 @@ const create = async (req: Request, res: Response) => {
 
 const update = async (req: Request, res: Response) => {
   try {
-    const product: products = {
-      id: req.params.id,
-      name: req.body.name,
-      price: req.body.price,
-    };
+    const id = req.params.id;
+    const name = req.body.name;
+    const price = req.body.price;
+    if (id && name && price) {
+      const new_product = await our_product_main.update_product(
+        id,
+        name,
+        price
+      );
 
-    const new_product = await our_product_main.update_product(product);
-    if (new_product) {
       return res.json({
         status: 200,
         data: { ...new_product },
@@ -115,9 +118,9 @@ const destroy = async (req: Request, res: Response) => {
 };
 
 const products_handler = (app: express.Application): void => {
-  app.get("/products", verifyAuthToken, index);
+  app.get("/products", index);
 
-  app.get("/product/:id", verifyAuthToken, show);
+  app.get("/product/:id", show);
 
   app.post("/product/create", verifyAuthToken, create);
 
