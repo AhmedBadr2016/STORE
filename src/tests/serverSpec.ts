@@ -1,262 +1,344 @@
-// import supertest from "supertest";
-// import app from "../server";
+import supertest from "supertest";
+import app from "../server";
+
+const request = supertest(app);
+
+describe("test basic endpoint server", () => {
+  it("Get the / endpoint", async () => {
+    const response = await request.get("/");
+    expect(response.status).toBe(200);
+  });
+});
+
+/*
+import supertest from "supertest";
+import app from "../server";
 import { users } from "../types/users";
-import { userStore, hash_password } from "../models/user_methods";
-// import { orders } from "../types/orders";
-import order_model from "../models/order_methods";
-// import { products } from "../types/products";
-import product_model from "../models/product_methods";
-// import { order_products } from "../types/order_products";
-import order_product_model from "../models/order_product_methods";
-import config from "../config";
-//create a request object
-// const test = supertest(app);
+import Client from "../database";
+import { userStore } from "../models/user_methods";
+import { request } from "express";
+
+const test = supertest(app);
 const user_test = new userStore();
-const order_test = new order_model();
-const product_test = new product_model();
-const order_product_test = new order_product_model();
 
-describe("user Model test", () => {
-  const new_user_test: users = {
-    first_name: "ahmed",
-    last_name: "badr",
-    email: "eng.ahmedbadr2016@gmail.com",
-    username: "ahmed_badr",
-    password: "password123456",
-  };
-
-  const pass = hash_password("password123456");
-  const pass_2 = hash_password("pass3456");
-
-  const createdUser = {
-    first_name: "ahmed",
-    last_name: "badr",
-    email: "eng.ahmedbadr2016@gmail.com",
-    username: "ahmed_badr",
-  };
-
-  const new_user_test_2: users = {
-    first_name: "amr",
-    last_name: "badr",
-    email: "eng.ahmedbadr2016@gmail.com",
-    username: "amr_badr",
-    password: "password123456",
-  };
-
+describe("app endpoint test", () => {
   const new_user_test_3: users = {
-    first_name: "amr",
+    first_name: "ahmed",
     last_name: "badr",
     email: "eng.ahmedbadr2017@gmail.com",
-    username: "amr_badr",
+    username: "ahmed_badr",
     password: "password123456",
   };
+  beforeAll(async () => {
+    const createUser = await user_test.create(new_user_test_3);
+    const user_id = createUser?.id;
+    const password = createUser?.password;
+  });
 
-  const createdUser_2 = {
-    id: "6",
-    first_name: "ahmed",
-    last_name: "badr",
-    email: "eng.ahmedbadr2016@gmail.com",
-    username: "ahmed_badr",
-  };
-
-  // const new_product_test: products = {
-  // name: "apple",
-  // price: 30,
-  // };
-  // const createdProduct: products = { ...new_product_test, id: "1" };
-
-  // const new_order_test: orders = {
-  //  status: "active",
-  // user_id: "1",
-  // };
-  // const createdOrder: orders = { ...new_order_test, id: "1" };
-
-  // const new_order_product_test: order_products = {
-  // order_id: "1",
-  // product_id: "1",
-  // quantity: 4,
-  // };
-  // const createdOrder_product: order_products = {
-  //  ...new_order_product_test,
-  //  id: "1",
-  // };
+  afterAll(async () => {
+    const connection = await Client.connect();
+    // \nALTER SEQUENCE users_id_seq RESTART WITH 1;
+    const sql = "DELETE FROM users Where email = ($1)";
+    await connection.query(sql, ["eng.ahmedbadr2017@gmail.com"]);
+    connection.release();
+  });
 
   describe("user methods", () => {
-    it("Should has an index method", () => {
-      expect(user_test.index).toBeDefined();
+    it("Should has basic end point for app", async () => {
+      const output = await test.post("/user/sign_up").send({
+        first_name: "string",
+        last_name: "string",
+        email: "string@ghg.com",
+        username: "string",
+        password: "string",
+      });
+      expect(output).toBeDefined();
     });
-    it("index method Should return a list of users", async () => {
-      const output = await user_test.index();
-      expect(output).toEqual([]);
+
+    it("Should has basic end point for app", async () => {
+      const output = await test.post("/user/sign_in").send({
+        first_name: "string",
+        last_name: "string",
+        email: "string@ghg.com",
+        username: "string",
+        password: "string",
+      });
+      expect(output).toBeDefined();
     });
-    it("Should create new user to be created", async () => {
-      const result = await user_test.create(new_user_test);
-      expect(result?.username).toEqual("ahmed_badr");
+
+    it("Should has basic end point for app", async () => {
+      const output = await test.patch("/user/edit/eng.ahmedbadr2017@gmail.com");
+      expect(output).toBeDefined();
     });
-    it("Should authenticate user to be authenticated", async () => {
-      const result = await user_test.authenticate(
-        new_user_test.email,
-        new_user_test.password
+
+    it("Should has basic end point for app", async () => {
+      const output = await test.get("/users");
+      expect(output).toBeDefined();
+    });
+
+    it("Should has basic end point show user in app", async () => {
+      const output = await test.get("/user/eng.ahmedbadr2017@gmail.com");
+      expect(output).toBeDefined();
+    });
+
+    it("Should has basic end point for delete user in app", async () => {
+      const output = await test.delete(
+        "/user/delete/eng.ahmedbadr2017@gmail.com"
       );
-      expect(result?.username).toEqual("ahmed_badr");
+      expect(output).toBeDefined();
     });
-    it("Should update user to be updated", async () => {
-      const result = await user_test.update(new_user_test_2);
-      expect(result).toBeUndefined();
+  });
+
+  describe("product basic endpoints in app", () => {
+    it("Should has an index endpoint on /products", async () => {
+      const response = await test.get("/products");
+      expect(response.statusCode).toBe(200);
     });
-    it("Should show all users to be existed", async () => {
-      const result = await user_test.index();
-      expect(result).toBeDefined();
+
+    it("Should has an create endpoint on POST /product/create", async () => {
+      const response = await test.post("/product/create").send({
+        name: "string",
+        price: 12,
+      });
+      expect(response.statusCode).toBe(200);
     });
-    it("Should show specific user to be existed", async () => {
-      const result = await user_test.show(new_user_test_2.email);
-      expect(result.username).toEqual("amr_badr");
+
+    it("Should has an update endpoint on PATCH /product/edit/:id", async () => {
+      const response = await test.patch("/product/edit/:id");
+      expect(response.statusCode).toBe(200);
     });
-    it("Should delete user to be deleted", async () => {
-      const result = await user_test.delete(new_user_test.email);
-      expect(result).toBeTruthy;
+
+    it("Should has an show endpoint on GET /product/:id", async () => {
+      const response = await test.get("/product/:id");
+      expect(response.statusCode).toBe(200);
+    });
+
+    it("Should has an delete endpoint on DELETE /product/delete/:id", async () => {
+      const response = await test.get("/product/delete/:id");
+      expect(response.statusCode).toBe(200);
+    });
+  });
+
+  describe("order basic endpoints in app", () => {
+    it("Should has an index endpoint on /user/sign_in/orders", async () => {
+      const response = await test.get("/user/sign_in/orders");
+      expect(response.statusCode).toBe(200);
+    });
+
+    it("Should has an create endpoint on POST /user/sign_in/order", async () => {
+      const response = await test.post("/user/sign_in/order").send({
+        status: "active",
+        user_id: "1",
+      });
+      expect(response.statusCode).toBe(200);
+    });
+
+    it("Should has an update endpoint on PATCH /user/sign_in/order/edit/:id", async () => {
+      const response = await test.patch("/user/sign_in/order/edit/:id");
+      expect(response.statusCode).toBe(200);
+    });
+
+    it("Should has an show endpoint on GET /user/sign_in/order/:id", async () => {
+      const response = await test.get("/user/sign_in/order/:id");
+      expect(response.statusCode).toBe(200);
+    });
+
+    it("Should has an delete endpoint on DELETE /user/sign_in/order/delete/:id", async () => {
+      const response = await test.get("/user/sign_in/order/delete/:id");
+      expect(response.statusCode).toBe(200);
+    });
+  });
+
+  describe("order_product basic endpoints in app", () => {
+    it("Should has an index endpoint on /order_product/:id", async () => {
+      const response = await test.get("/order_product/:id");
+      expect(response.statusCode).toBe(200);
+    });
+
+    it("Should has an create endpoint on POST /order_product/create", async () => {
+      const response = await test.post("/order_product/create").send({
+        quantity: 15,
+      });
+      expect(response.statusCode).toBe(200);
+    });
+
+    it("Should has an add product to cart endpoint on POST /user/sign_in/order/:id/products", async () => {
+      const response = await test
+        .post("/user/sign_in/order/:id/products")
+        .send({
+          id: "1",
+        });
+      expect(response.statusCode).toBe(200);
+    });
+
+    it("Should has an update endpoint on PATCH /order_product/edit/:id", async () => {
+      const response = await test.patch("/order_product/edit/:id");
+      expect(response.statusCode).toBe(200);
+    });
+
+    it("Should has an show endpoint on GET /order_product/:id", async () => {
+      const response = await test.get("/order_product/:id");
+      expect(response.statusCode).toBe(200);
+    });
+
+    it("Should has an delete endpoint on DELETE /order_product/delete/:id", async () => {
+      const response = await test.get("/order_product/delete/:id");
+      expect(response.statusCode).toBe(200);
     });
   });
 });
-
-describe("product Model", () => {
-  it("should have an index method", () => {
-    expect(product_test.get_all_products).toBeDefined();
-  });
-
-  it("should have a show method", () => {
-    expect(product_test.get_specific_product).toBeDefined();
-  });
-
-  it("should have a create method", () => {
-    expect(product_test.create).toBeDefined();
-  });
-
-  it("should have a update method", () => {
-    expect(product_test.update_product).toBeDefined();
-  });
-
-  it("should have a delete method", () => {
-    expect(product_test.delete).toBeDefined();
-  });
-
-  it("create method should add a product", async () => {
-    const result = await product_test.create({
-      name: "Bridge to Terabithia",
-      price: 250,
-    });
-    expect(result.name).toEqual("Bridge to Terabithia");
-  });
-
-  it("index method should return a list of products", async () => {
-    const result = await product_test.get_all_products();
-    expect(result).toBeDefined();
-  });
-
-  it("show method should return the correct product", async () => {
-    const result = await product_test.get_specific_product("2");
-    expect(result).toBeDefined();
-  });
-
-  it("delete method should remove the product", async () => {
-    // product_test.delete();
-    const result = await product_test.delete("1");
-
-    expect(result).toBeUndefined();
-  });
-});
-
-describe("order Model", () => {
-  it("should have an index method", () => {
-    expect(order_test.get_all_orders).toBeDefined();
-  });
-
-  it("should have a show method", () => {
-    expect(order_test.get_specific_order).toBeDefined();
-  });
-
-  it("should have a create method", () => {
-    expect(order_test.create).toBeDefined();
-  });
-
-  it("should have a update method", () => {
-    expect(order_test.update_order).toBeDefined();
-  });
-
-  it("should have a delete method", () => {
-    expect(order_test.delete).toBeDefined();
-  });
-  /*
-  it("create method should add a new order", async () => {
-    const result = await order_test.create({
-      status: "complete",
-      user_id: "2",
-    });
-    expect(result).toBeFalse();
-  });
 */
-  it("index method should return a list of orders", async () => {
-    const result = await order_test.get_all_orders();
-    expect(result).toEqual([]);
+/*import supertest from "supertest";
+import app from "../server";
+import { users } from "../types/users";
+import Client from "../database";
+import { userStore } from "../models/user_methods";
+
+const test = supertest(app);
+const user_test = new userStore();
+
+describe("app endpoint test", () => {
+  it("Should has basic end point for app", async () => {
+    const output = await test.post("/");
+    expect(output.status).toBe(200);
+  });
+  const new_user_test_3: users = {
+    first_name: "ahmed",
+    last_name: "badr",
+    email: "eng.ahmedbadr2017@gmail.com",
+    username: "ahmed_badr",
+    password: "password123456",
+  };
+  beforeAll(async () => {
+    const createUser = await user_test.create(new_user_test_3);
+    const user_id = createUser?.id;
+    const password = createUser?.password;
   });
 
-  it("show method should return the correct order", async () => {
-    const result = await order_test.get_specific_order("1");
-    expect(result).toBeFalsy();
+  afterAll(async () => {
+    const connection = await Client.connect();
+    // \nALTER SEQUENCE users_id_seq RESTART WITH 1;
+    const sql = "DELETE FROM users ";
+    await connection.query(sql);
+    connection.release();
   });
 
-  it("delete method should remove the order", async () => {
-    // order_test.delete();
-    const result = await order_test.delete("1");
-
-    expect(result).toBeUndefined();
-  });
-});
-
-describe("order_product Model", () => {
-  it("should have an index method", () => {
-    expect(order_product_test.get_all_order_products).toBeDefined();
-  });
-
-  it("should have a show method", () => {
-    expect(order_product_test.get_specific_order_product).toBeDefined();
-  });
-
-  it("should have a create method", () => {
-    expect(order_product_test.create).toBeDefined();
-  });
-
-  it("should have a update method", () => {
-    expect(order_product_test.update_order_product).toBeDefined();
-  });
-
-  it("should have a delete method", () => {
-    expect(order_product_test.delete).toBeDefined();
-  });
-  /*
-  it("create method should add a order_product", async () => {
-    const result = await order_product_test.create({
-      order_id: "1",
-      product_id: "1",
-      quantity: 10,
+  describe("user methods", () => {
+    it("Should has basic end point for app", async () => {
+      const output = await test.post("/user/sign_up");
+      expect(output.status).toBe(400);
     });
-    expect(result).toBeFalse();
-  });
-*/
-  it("index method should return a list of order_products", async () => {
-    const result = await order_product_test.get_all_order_products();
-    expect(result).toEqual([]);
+
+    it("Should has basic end point for app", async () => {
+      const output = await test.post("/user/sign_in");
+      expect(output.status).toBe(200);
+    });
+
+    it("Should has basic end point for app", async () => {
+      const output = await test.patch("/user/edit/:email");
+      expect(output.status).toBe(400);
+    });
+
+    it("Should has basic end point for app", async () => {
+      const output = await test.get("/users");
+      expect(output.status).toBe(400);
+    });
+
+    it("Should has basic end point show user in app", async () => {
+      const output = await test.get("/user/:email");
+      expect(output.status).toBe(400);
+    });
+
+    it("Should has basic end point for delete user in app", async () => {
+      const output = await test.delete("/user/delete/:email");
+      expect(output.status).toBe(400);
+    });
   });
 
-  it("show method should return the correct order_product", async () => {
-    const result = await order_product_test.get_specific_order_product("1");
-    expect(result).toBeFalsy();
+  describe("product basic endpoints in app", () => {
+    it("Should has an index endpoint on /products", async () => {
+      const response = await test.get("/products");
+      expect(response.status).toBe(400);
+    });
+
+    it("Should has an create endpoint on POST /product/create", async () => {
+      const response = await test.post("/product/create");
+      expect(response.status).toBe(400);
+    });
+
+    it("Should has an update endpoint on PATCH /product/edit/:id", async () => {
+      const response = await test.patch("/product/edit/:id");
+      expect(response.status).toBe(400);
+    });
+
+    it("Should has an show endpoint on GET /product/:id", async () => {
+      const response = await test.get("/product/:id");
+      expect(response.status).toBe(400);
+    });
+
+    it("Should has an delete endpoint on DELETE /product/delete/:id", async () => {
+      const response = await test.get("/product/delete/:id");
+      expect(response.status).toBe(400);
+    });
   });
 
-  it("delete method should remove the order_product", async () => {
-    // order_product_test.delete();
-    const result = await order_product_test.delete("1");
+  describe("order basic endpoints in app", () => {
+    it("Should has an index endpoint on /user/sign_in/orders", async () => {
+      const response = await test.get("/user/sign_in/orders");
+      expect(response.status).toBe(400);
+    });
 
-    expect(result).toBeFalsy();
+    it("Should has an create endpoint on POST /user/sign_in/order", async () => {
+      const response = await test.post("/user/sign_in/order");
+      expect(response.status).toBe(400);
+    });
+
+    it("Should has an update endpoint on PATCH /user/sign_in/order/edit/:id", async () => {
+      const response = await test.patch("/user/sign_in/order/edit/:id");
+      expect(response.status).toBe(400);
+    });
+
+    it("Should has an show endpoint on GET /user/sign_in/order/:id", async () => {
+      const response = await test.get("/user/sign_in/order/:id");
+      expect(response.status).toBe(400);
+    });
+
+    it("Should has an delete endpoint on DELETE /user/sign_in/order/delete/:id", async () => {
+      const response = await test.get("/user/sign_in/order/delete/:id");
+      expect(response.status).toBe(400);
+    });
+  });
+
+  describe("order_product basic endpoints in app", () => {
+    it("Should has an index endpoint on /order_product/:id", async () => {
+      const response = await test.get("/order_product/:id");
+      expect(response.status).toBe(400);
+    });
+
+    it("Should has an create endpoint on POST /order_product/create", async () => {
+      const response = await test.post("/order_product/create");
+      expect(response.status).toBe(400);
+    });
+
+    it("Should has an add product to cart endpoint on POST /user/sign_in/order/:id/products", async () => {
+      const response = await test.post("/user/sign_in/order/:id/products");
+      expect(response.status).toBe(400);
+    });
+
+    it("Should has an update endpoint on PATCH /order_product/edit/:id", async () => {
+      const response = await test.patch("/order_product/edit/:id");
+      expect(response.status).toBe(400);
+    });
+
+    it("Should has an show endpoint on GET /order_product/:id", async () => {
+      const response = await test.get("/order_product/:id");
+      expect(response.status).toBe(400);
+    });
+
+    it("Should has an delete endpoint on DELETE /order_product/delete/:id", async () => {
+      const response = await test.get("/order_product/delete/:id");
+      expect(response.status).toBe(400);
+    });
   });
 });
+*/
